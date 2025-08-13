@@ -1,0 +1,257 @@
+:root {
+  /* Timing and scales */
+  --cycle-duration: 20s; /* 5s inhale, 5s hold, 5s exhale, 5s hold */
+  --min-scale: 0.1;
+  --max-scale: 1.44;
+  --box-glow-scale: 1.15;
+  /* Pulse factors for small circle */
+  --min-pulse-factor-strong: 1.1;
+  --min-pulse-factor-soft: .8;
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Layout baseline */
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: rgba(255, 255, 255, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Animated background */
+  background: linear-gradient(-45deg, #0ea5e9, #8b5cf6, #ec4899, #22c55e);
+  background-size: 400% 400%;
+  animation: gradientShift 30s ease infinite;
+}
+
+#app {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+/* Breathing stage container */
+.breathe-container {
+  display: grid;
+  place-items: center;
+  width: min(80vmin, 90vw);
+  height: min(80vmin, 90vh);
+}
+
+/* The square box that frames the breath */
+.breathe-box {
+  position: relative;
+  width: min(60vmin, 80vw);
+  height: min(60vmin, 80vw);
+  border: 4px solid rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  overflow: hidden;
+  backdrop-filter: saturate(120%);
+  transform-origin: center;
+
+  /* Pulse/glow during full hold */
+  animation: boxPulse var(--cycle-duration) infinite;
+}
+
+/* The inner circle that expands/collapses */
+.breathe-circle {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 100%;
+  height: 100%;
+  transform-origin: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 0 120px inset rgba(34, 214, 255, 0.417);
+  backdrop-filter: hue(100deg);
+  /* Full breathing cycle */
+  animation: circleBreath var(--cycle-duration) infinite;
+}
+
+/* Background gradient animation */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Circle scale over 4 phases: inhale, hold full, exhale, hold empty */
+@keyframes circleBreath {
+  /* Inhale: grow from min to max */
+  0% {
+    transform: scale(var(--min-scale));
+    animation-timing-function: linear;
+    box-shadow: 0 0 120px inset rgb(255, 255, 255);
+    background: rgba(255, 255, 255, 0.18);
+
+  }
+
+  25% {
+    transform: scale(var(--max-scale));
+    animation-timing-function: linear; /* Hold full */
+    box-shadow: 0 0 120px inset rgb(255, 255, 255);
+    background: rgba(255, 162, 249, 0.459);
+
+  }
+
+  /* Hold full: stay at max */
+  50% {
+    transform: scale(var(--max-scale));
+    animation-timing-function: ease-out; /* Exhale starts */
+    box-shadow: 0 0 120px inset rgba(43, 181, 255, 0.878);
+    background: rgba(63, 207, 255, 0.374);
+
+
+  }
+
+  /* Exhale: shrink from max to min */
+  75% {
+    transform: scale(var(--min-scale));
+    animation-timing-function: linear; /* Hold empty */
+    box-shadow: 0 0 120px inset rgb(255, 255, 255);
+    background: rgba(255, 255, 255, 0.18);
+  }
+  /* Subtle pulse while small (hold empty) */
+  82% {
+    transform: scale(calc(var(--min-scale) * var(--min-pulse-factor-soft)));
+    animation-timing-function: ease-in-out;
+  }
+  89% {
+    transform: scale(var(--min-scale));
+    animation-timing-function: ease-in-out;
+  }
+  95% {
+    transform: scale(calc(var(--min-scale) * var(--min-pulse-factor-soft)));
+    animation-timing-function: ease-in-out;
+  }
+
+  /* Hold empty: stay at min */
+  100% {
+    transform: scale(var(--min-scale));
+    box-shadow: 0 0 120px inset rgb(255, 255, 255);
+    animation-timing-function: ease-in-out; /* Exhale starts */
+    background: rgba(255, 255, 255, 0.18);
+  }
+}
+
+/* Box pulse/glow during full hold phase */
+@keyframes boxPulse {
+  0% {
+    transform: scale(.9);
+    filter: none;
+    box-shadow: 0 0 30px #fff0;
+    animation-timing-function: ease-in-out; /* Inhale begins */
+  }
+  12% {
+    transform: scale(.9);
+    filter: none;
+    box-shadow: 0 0 30px #fff0;
+    animation-timing-function: ease-in-out; /* Inhale begins */
+  }
+  25% {
+    transform: scale(var(--box-glow-scale));
+    box-shadow: 0 0 30px #ffff;
+    animation-timing-function: ease-in-out; /* Exhale begins */
+  }
+  60% {
+    transform: scale(var(--box-glow-scale));
+    box-shadow: 0 0 30px #ffff;
+    animation-timing-function: ease-in-out; /* Exhale begins */
+  }
+  75% {
+    transform: scale(.9);
+    box-shadow: 0 0 30px #fff0;
+    animation-timing-function: ease-in-out; /* Exhale begins */
+  }
+  100% {
+    transform: scale(.9);
+    box-shadow: 0 0 30px #fff0;
+    animation-timing-function: ease-in-out; /* Exhale begins */
+  }
+}
+
+/* Countdown overlay */
+.breathe-box .countdown {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.breathe-box .countdown::after {
+  content: "5";
+  font-family: sans-serif;
+  font-size: clamp(4rem, 22vmin, 30rem);
+  font-weight: 800;
+  color: rgba(255, 204, 247, 0.109);
+  line-height: 1;
+  animation: countdown 5s linear infinite;
+  animation-delay: .5s;
+}
+
+/* Breathing phase overlay */
+.breathe-box .breathing-phase {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 1;
+  pointer-events: none;
+  transform: translateY(8rem);
+}
+
+.breathe-box .breathing-phase::after {
+  content: "hold";
+  font-family: sans-serif;
+  font-size: clamp(1.5rem, 8vmin, 4rem);
+  font-weight: 300;
+  color: rgba(255, 204, 247, 0.139);
+  line-height: 1;
+  text-transform: uppercase;
+  animation: breathingPhase var(--cycle-duration) linear infinite;
+  animation-delay: 0s;
+
+}
+
+@keyframes countdown {
+  0% { content: "4"; }
+  25% { content: "3"; }
+  50% { content: "2"; }
+  75% { content: "1"; }
+  100% { content: "4"; }
+}
+
+/* Breathing phase animation - aligns with 20s breathing cycle */
+@keyframes breathingPhase {
+  /* Hold empty: 0-25% (first 5 seconds) */
+  0% { content: "inhale"; }
+  24.9% { content: "inhale"; }
+  
+  /* Inhale: 25-50% (seconds 5-10) */
+  25% { content: "hold"; }
+  49.9% { content: "hold"; }
+  
+  /* Hold full: 50-75% (seconds 10-15) */  
+  50% { content: "release"; }
+  74.9% { content: "release"; }
+  
+  /* Release/Exhale: 75-100% (seconds 15-20) */
+  75% { content: "hold"; }
+  100% { content: "hold"; }
+} 
